@@ -1,0 +1,174 @@
+package testing;
+
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class StockTradingPlatform {
+    public class Stock {
+        private final String symbol;
+        private int quantity; //shares
+        private double price_per_one;
+        public Stock(String symbol, int quantity, double price_per_one) {
+            this.symbol = symbol;
+            this.quantity = quantity;
+            this.price_per_one = price_per_one;
+        }
+        public String getSymbol() {
+            return symbol;
+        }
+        public int getQuantity() {
+            return quantity;
+        }
+        public double get_price_per_one() {
+            return price_per_one;
+        }
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
+        @Override
+        public String toString() {
+            return "Symbol: " + symbol +
+                    ", Quantity: " + quantity +
+                    ", Price: $" + price_per_one;
+        }
+    }
+    public class Portfolio {
+        private ArrayList<Stock> holding;
+
+        public Portfolio() {
+            holding = new ArrayList<>();
+        }
+        public void buyStock(Stock stock) {
+            for (Stock s:holding) {
+                if (s.getSymbol().equals(stock.getSymbol())) {
+                    s.setQuantity(s.getQuantity() + stock.getQuantity());
+                    System.out.println("The stock is founded and quantity added");
+                    return;
+                }
+            }
+            holding.add(stock);
+
+        }
+        public void sellStock(String symbol,int quantity) {
+            for (Stock s:holding) {
+                if(s.getSymbol().equals(symbol)) {
+                    int quantity_now = s.getQuantity();
+                    if(quantity_now>=quantity) {
+                        s.setQuantity(quantity_now-quantity);
+                        if (s.getQuantity() == 0) {
+                            holding.remove(s);
+                        }
+                        return;
+                    }
+                    else {
+                        System.out.println("No enough quantity to deduct");
+                        return;
+                    }
+                }
+            }
+            System.out.println("This "+symbol+" is not in the portfolio !!!");
+        }
+        public int getPortfolioValue() {
+            int total = 0;
+            for (Stock s: holding) {
+                total+=s.getQuantity() * s.get_price_per_one();
+            }
+            return total;
+        }
+        public void ViewPortfolio() {
+            for(Stock s: holding) {
+                System.out.println("Symbol: "+s.getSymbol()+" Shares/Quantity: "+s.getQuantity()+" Price: "+s.get_price_per_one());
+            }
+        }
+
+    }
+    public class Market {
+        ArrayList<Stock> stocks;
+        public Market() {
+            stocks = new ArrayList<>();
+            stocks.add(new Stock("AAPL",10,150));
+            stocks.add(new Stock("GOOGL",8,350));
+            stocks.add(new Stock("TSLA",15,233));
+            stocks.add(new Stock("MSFT",5,200));
+            stocks.add(new Stock("AMZN",9,188));
+        }
+        public void view_Market() {
+            for (Stock s:stocks) {
+                System.out.println("Symbol: "+s.getSymbol()+"; Available Shares/Quantity: "+s.getQuantity()+"; Price: "+s.get_price_per_one());
+            }
+        }
+        public void update_Market_Data(String symbol,int input_quantity) {
+            boolean flag = false;
+            for(Stock s: stocks) {
+                if(s.getSymbol().equals(symbol)) {
+                    flag =true;
+                    if(s.getQuantity()>=input_quantity) {
+                        s.setQuantity(s.getQuantity() - input_quantity);
+                        if (s.getQuantity() == 0) {
+                            stocks.remove(s);
+                        }
+                    }
+                    break;
+                }
+            }
+            if (!flag) {
+                System.out.println("This company is not founded!!");
+            }
+        }
+    }
+    public static void main(String[] args) {
+        StockTradingPlatform platform = new StockTradingPlatform();
+        Market market = platform.new Market();
+        Portfolio p = platform.new Portfolio();
+        Scanner scan = new Scanner(System.in);
+        boolean flag = true;
+        while(flag) {
+            System.out.println("Hello!");
+            System.out.println("(1) Market Data");
+            System.out.println("(2) Portfolio Data");
+            System.out.println("(3) Buy a Stock");
+            System.out.println("(4) Sell a Stock");
+            System.out.println("(5) Exit");
+            System.out.println("Choose a Number from 1-5: ");
+            int input = scan.nextInt();
+            switch (input) {
+                case 1:
+                    market.view_Market();
+                    break;
+                case 2:
+                    p.ViewPortfolio();
+                    System.out.println("The total value of your portfolio: " + p.getPortfolioValue());
+                    break;
+                case 3:
+                    System.out.println("Enter the symbol of the company: ");
+                    String symbol = scan.next().toUpperCase();
+                    System.out.println("Enter the quantity: ");
+                    int input_quantity = scan.nextInt();
+                    market.update_Market_Data(symbol, input_quantity);
+                    System.out.println("Enter the price for each share: ");
+                    int price = scan.nextInt();
+                    Stock newstock = platform.new Stock(symbol, input_quantity, price);
+                    p.buyStock(newstock);
+                    break;
+                case 4:
+                    System.out.println("Enter the symbol of the company: ");
+                    String input_symbol = scan.next().toUpperCase();
+                    System.out.println("Enter the quantity: ");
+                    int quantity = scan.nextInt();
+                    p.sellStock(input_symbol, quantity);
+                    break;
+                case 5:
+                    System.out.println("Exit");
+                    flag = false;
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + input);
+            }
+        }
+
+    }
+}
+
+
+
+
